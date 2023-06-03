@@ -15,5 +15,3 @@ jobs:
       - uses: waylonwalker/hatch-action@v3
         with:
           before-command: "test-lint"
-        env:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
