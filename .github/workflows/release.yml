@@ -16,4 +16,4 @@ jobs:
         with:
           before-command: "test-lint"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
