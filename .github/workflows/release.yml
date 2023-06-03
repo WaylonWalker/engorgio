@@ -5,12 +5,11 @@ on:
     paths:
       - "engorgio/**"
       - "pyproject.toml"
-env:
-  HATCH_INDEX_USER: __token__
-  HATCH_INDEX_AUTH: ${{ secrets.pypi_password }}
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: waylonwalker/hatch-action@v3
