@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 504d8f2
+_src_path: /home/waylon/git/pytool-template
+author_github: waylonwalker
+author_name: Waylon Walker
+description: Decorator for using pydantic objects with typer
+package_name: pydantic-typer
+package_title: Pydantic Typer
+package_title_input: Pydantic Typer
+python_package: pydantic_typer
+
