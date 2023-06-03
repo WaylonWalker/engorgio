@@ -5,15 +5,19 @@ on:
     paths:
       - "engorgio/**"
       - "pyproject.toml"
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+  packages: none
+  id-token: write
 jobs:
   release:
     runs-on: ubuntu-latest
-    # permissions:
-    #   id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: waylonwalker/hatch-action@v3
         with:
           before-command: "test-lint"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
