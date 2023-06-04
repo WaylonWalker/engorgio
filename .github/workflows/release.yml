@@ -19,3 +19,6 @@ jobs:
       - uses: waylonwalker/hatch-action@v4
         with:
           before-command: "test-lint"
+        env:
+          # required for gh release
+          GH_TOKEN: ${{ github.token }}
