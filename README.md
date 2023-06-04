@@ -1,6 +1,11 @@
 # engorgio
 
+<img src="https://github.com/WaylonWalker/engorgio/assets/22648375/e2577efd-cb4b-417a-8139-ef2a7d75c8d9" width=100%>
+
+Expands function arguments into fields.
+
 https://user-images.githubusercontent.com/22648375/235036031-a9dc6589-e350-4a18-9114-6568cb362f74.mp4
+
 
 ## Installation
 
