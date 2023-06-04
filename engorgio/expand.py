@@ -1,5 +1,5 @@
 """
-Exapand pydantic arguments.
+Exapand model function arguments to fields.
 
 Core implementation of engorgio to expand pydantic arguments.
 
@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-from pydantic.fields import ModelField
 import pyflyby
+from pydantic.fields import ModelField
 
 
 def make_annotation(
@@ -22,6 +22,7 @@ def make_annotation(
     *,
     typer: bool = False,
 ) -> str:
+    """Create an annotation for pydantic ModelFields."""
     panel_name = names.get(name)
     next_name = panel_name
     while next_name is not None:
@@ -65,6 +66,7 @@ def make_signature(
     typer: bool = False,
     more_args: Optional[Dict] = None,
 ):
+    """Return a new function with that accepts model fields."""
     if more_args is None:
         more_args = {}
     sig = inspect.signature(func)

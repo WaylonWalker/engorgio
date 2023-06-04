@@ -6,12 +6,14 @@ Classes:
 * `Color`: A class for representing a color.
 * `Hair`: A class for representing hair.
 * `Person`: A class for representing a person.
+* `MyDate`: A class for representing a date.
 
 """
-
+from dataclasses import dataclass
 import datetime
 from typing import Optional
 
+from polyfactory.factories import DataclassFactory
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel, Field
 
@@ -128,5 +130,22 @@ class MyDate(BaseModel):
     date: datetime.datetime
 
 
-class DateFactory(ModelFactory[MyDate]):
+class MyDateFactory(ModelFactory[MyDate]):
     __model__ = MyDate
+
+
+@dataclass
+class PersonDataclass:
+    name: str
+    alias: Optional[str]
+    age: int
+    email: Optional[str]
+    pet: str
+    address: str
+
+
+class PersonDataclassFactory(DataclassFactory[PersonDataclass]):
+
+    """A class for generating a person."""
+
+    __model__ = PersonDataclass

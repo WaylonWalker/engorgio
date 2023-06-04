@@ -9,7 +9,7 @@ from typing import Any, Callable
 
 import typer
 
-from expand import expand_kwargs, make_signature
+from engorgio.expand import expand_kwargs, make_signature
 
 __all__ = ["typer"]
 
