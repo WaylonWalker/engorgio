@@ -7,6 +7,7 @@ on:
       - "pyproject.toml"
 env:
   HATCH_INDEX_USER: __token__
+  HATCH_INDEX_AUTH: ${{ ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
 permissions:
   contents: write
   pull-requests: write
