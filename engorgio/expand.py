@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-import pyflyby
 from pydantic.fields import ModelField
+import pyflyby
 
 
 def make_annotation(
@@ -21,6 +21,7 @@ def make_annotation(
     names: Dict[str, str],
     *,
     typer: bool = False,
+    prompt_always: bool = False,
 ) -> str:
     """Create an annotation for pydantic ModelFields."""
     panel_name = names.get(name)
@@ -35,6 +36,9 @@ def make_annotation(
         if str(field.annotation).startswith("<")
         else str(field.annotation)
     )
+    prompt = ""
+    if prompt_always:
+        prompt = ", prompt=True"
 
     if "=" not in repr(field) and not hasattr(field, "required"):
         default = "=None"
@@ -42,12 +46,12 @@ def make_annotation(
         default = f'="{field.default}"'
     elif field.default is None and not getattr(field, "required", False):
         if typer:
-            default = f' = typer.Option(None, help="{field.field_info.description or ""}", rich_help_panel="{panel_name}")'
+            default = f' = typer.Option(None, help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
         else:
             default = "=None"
     elif field.default is not None:
         if typer:
-            default = f' = typer.Option("{field.default}", help="{field.field_info.description or ""}", rich_help_panel="{panel_name}")'
+            default = f' = typer.Option("{field.default}", help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
         else:
             default = f'="{field.default}"'
     elif typer:
@@ -149,7 +153,9 @@ def expand_param(
     using the expanded kwargs.y:
     using the expanded kwargs.
     """
-    models = {}
+    if models is None:
+        models = {}
+
     for field_name, field in param.annotation.__fields__.items():
         if hasattr(field.annotation, "__fields__"):
             models[field_name] = expand_param(field, kwargs, models)
