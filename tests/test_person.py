@@ -214,3 +214,35 @@ def test_mydate_instance(date: models.MyDate) -> None:
         return date
 
     assert get_mydate(**date.dict()) == date
+
+
+# def test_persondataclass() -> None:
+#     @engorgio()
+#     def get_persondataclass(person: models.PersonDataclass) -> None:
+#         """Mydocstring."""
+#         return person
+
+#     sig = inspect.signature(get_persondataclass)
+#     params = sig.parameters
+#     assert "name" in params
+#     assert "alias" in params
+#     assert "age" in params
+#     assert "email" in params
+#     assert "pet" in params
+#     assert "address" in params
+
+#     person = models.PersonDataclassFactory().build()
+#     assert get_persondataclass(**person.dict()) == person
+
+
+# @pytest.mark.parametrize(
+#     "person",
+#     models.PersonDataclassFactory().batch(size=5),
+# )
+# def test_persondataclass_instance(person: models.PersonDataclass) -> None:
+#     @engorgio()
+#     def get_persondataclass(person: models.PersonDataclass) -> None:
+#         """Mydocstring."""
+#         return person
+
+#     assert get_persondataclass(**person.dict()) == person

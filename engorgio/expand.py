@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-from pydantic.fields import ModelField
 import pyflyby
+from pydantic.fields import ModelField
 
 
 def make_annotation(
