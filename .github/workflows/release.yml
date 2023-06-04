@@ -16,10 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: waylonwalker/hatch-action@v3
+      - uses: waylonwalker/hatch-action@v4
         with:
           before-command: "test-lint"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          HATCH_INDEX_USER: __token__
-          HATCH_INDEX_AUTH: ${{ ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
