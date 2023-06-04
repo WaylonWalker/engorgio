@@ -5,6 +5,8 @@ on:
     paths:
       - "engorgio/**"
       - "pyproject.toml"
+env:
+  HATCH_INDEX_USER: __token__
 permissions:
   contents: write
   pull-requests: write
