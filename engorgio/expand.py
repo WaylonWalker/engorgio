@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-import pyflyby
 from pydantic.fields import ModelField
+import pyflyby
 
 
 def make_annotation(
@@ -171,6 +171,7 @@ def expand_kwargs(func: Callable, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     for name, param in sig.parameters.items():
         # func wants this directly
         # this should check isinstance, but it's not working
+        #
         if name in kwargs and repr(param.annotation) == repr(kwargs[name]):
             updated_kwargs[name] = kwargs[name]
 
