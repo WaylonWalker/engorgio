@@ -1,4 +1,9 @@
-"""Condense parameters back into models."""
+"""Condense parameters back into models.
+
+SPDX-FileCopyrightText: 2023-present Waylon S. Walker <waylon@waylonwalker.com>
+
+SPDX-License-Identifier: MIT
+"""
 import inspect
 from typing import Any, Callable, Dict, Optional
 

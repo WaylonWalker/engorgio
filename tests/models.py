@@ -7,6 +7,12 @@ Classes:
 * `Hair`: A class for representing hair.
 * `Person`: A class for representing a person.
 * `MyDate`: A class for representing a date.
+* `Hero`: A class for representing a hero.
+* `Pet`: A class for representing a pet.
+
+SPDX-FileCopyrightText: 2023-present Waylon S. Walker <waylon@waylonwalker.com>
+
+SPDX-License-Identifier: MIT
 
 """
 from dataclasses import dataclass
@@ -99,12 +105,12 @@ class Person(BaseModel):
 
 
 class Pet(BaseModel):
-    name: str
+    name: str = Field(..., description="The pet's name.")
 
 
 class Hero(BaseModel):
-    name: str
-    pet: Pet
+    name: str = Field(..., description="The hero's name.")
+    pet: Pet = Field(..., description="The hero's pet.")
 
 
 class AlphaFactory(ModelFactory[Alpha]):

@@ -37,11 +37,10 @@ def get_person(person: Person, thing: str, another: str = "this") -> Person:
 @app.command()
 @engorgio(typer=True)
 def get_hero(hero: Hero) -> Hero:
-    """Get a person's information."""
+    """Get a hero"""
     from rich import print
 
     print(hero)
-    return hero
 
 
 if __name__ == "__main__":

@@ -1,3 +1,11 @@
+"""
+Test for functions that have no type annotations, or type annotations that are
+not Pydantic models.
+
+SPDX-FileCopyrightText: 2023-present Waylon S. Walker <waylon@waylonwalker.com>
+
+SPDX-License-Identifier: MIT
+"""
 import inspect
 
 from engorgio import engorgio

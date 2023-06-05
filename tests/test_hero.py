@@ -1,6 +1,10 @@
 """
 Hero has a Pet, both have a name.  These tests assert the names don't get
 mixed.
+
+SPDX-FileCopyrightText: 2023-present Waylon S. Walker <waylon@waylonwalker.com>
+
+SPDX-License-Identifier: MIT
 """
 
 import inspect
