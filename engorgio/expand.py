@@ -88,21 +88,16 @@ def make_annotation(
     return f"{name}: {annotation}{default}"
 
 
-def make_expanded_function(
+def init_more_args(
     func: Callable,
-    wrapper: Callable,
+    more_args: Dict,
     model_separator: str = "__",
     *,
-    include_parent_model: bool = True,
-    typer: bool = False,
-    more_args: Optional[Dict] = None,
-):
-    """Return a new function with that accepts model fields."""
-    if more_args is None:
-        more_args = {}
-    sig = inspect.signature(func)
+    include_parent_model: bool = False,
+) -> Dict:
+    """Initialize the more_args dict."""
     parents = {}
-
+    sig = inspect.signature(func)
     for name, param in sig.parameters.items():
         if hasattr(param.annotation, "__fields__"):
             if include_parent_model:
@@ -117,6 +112,26 @@ def make_expanded_function(
                 parents[field] = param.annotation.__name__
         else:
             more_args[name] = param
+        return more_args, parents
+    return None
+
+
+def get_more_args(
+    func: Callable,
+    model_separator: str = "__",
+    *,
+    include_parent_model: bool = None,
+    more_args: Optional[Dict] = None,
+) -> Dict:
+    """Get the more_args dict."""
+    if more_args is None:
+        more_args = {}
+    more_args, parents = init_more_args(
+        func=func,
+        model_separator=model_separator,
+        include_parent_model=include_parent_model,
+        more_args=more_args,
+    )
 
     while any(
         hasattr(param.annotation, "__fields__") for name, param in more_args.items()
@@ -144,11 +159,28 @@ def make_expanded_function(
 
         for key in keys_to_remove:
             del more_args[key]
+    return more_args
+
+
+def make_expanded_function(
+    func: Callable,
+    wrapper: Callable,
+    model_separator: str = "__",
+    *,
+    include_parent_model: bool = True,
+    typer: bool = False,
+):
+    """Return a new function with that accepts model fields."""
+    more_args = get_more_args(
+        func=func,
+        model_separator=model_separator,
+        include_parent_model=include_parent_model,
+    )
 
     annotations = [
         make_annotation(
-            name,
-            field,
+            name=name,
+            field=field,
             model_separator=model_separator,
             typer=typer,
         )
@@ -185,7 +217,6 @@ def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
                 new_func,
                 wrapper,
                 typer=typer,
-                more_args=more_args,
                 model_separator=model_separator,
             )
     return new_func
