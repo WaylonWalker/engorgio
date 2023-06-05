@@ -11,23 +11,62 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-from pydantic.fields import ModelField
 import pyflyby
+from pydantic.fields import ModelField
+
+
+def create_default(field: ModelField) -> str:
+    """Create the default value for pydantic ModelFields."""
+    if "=" not in repr(field) and not hasattr(field, "required"):
+        default = "=None"
+    elif not hasattr(field, "required"):
+        default = f'="{field.default}"'
+    elif field.default is None and not getattr(field, "required", False):
+        default = "=None"
+    elif field.default is not None:
+        default = f'="{field.default}"'
+    else:
+        default = ""
+
+    return default
+
+
+def create_default_typer(
+    panel_name: str,
+    field: ModelField,
+    *,
+    prompt_always: bool,
+) -> str:
+    """Create the default value for pydantic ModelFields for typer functions."""
+    prompt = ""
+    if prompt_always:
+        prompt = ", prompt=True"
+    if "=" not in repr(field) and not hasattr(field, "required"):
+        default = "=None"
+    elif not hasattr(field, "required"):
+        default = f'="{field.default}"'
+    elif field.default is None and not getattr(field, "required", False):
+        default = f' = typer.Option(None, help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
+    elif field.default is not None:
+        default = f' = typer.Option("{field.default}", help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
+    else:
+        default = f' = typer.Option(..., help="{field.field_info.description or ""}", rich_help_panel="{panel_name}", prompt=True)'
+    return default
 
 
 def make_annotation(
     name: str,
     field: ModelField,
-    names: Dict[str, str],
+    parents: Dict[str, str],
     *,
     typer: bool = False,
     prompt_always: bool = False,
 ) -> str:
     """Create an annotation for pydantic ModelFields."""
-    panel_name = names.get(name)
+    panel_name = parents.get(name)
     next_name = panel_name
     while next_name is not None:
-        next_name = names.get(next_name)
+        next_name = parents.get(next_name)
         if next_name is not None:
             panel_name = f"{next_name}.{panel_name}"
 
@@ -36,30 +75,17 @@ def make_annotation(
         if str(field.annotation).startswith("<")
         else str(field.annotation)
     )
-    prompt = ""
-    if prompt_always:
-        prompt = ", prompt=True"
-
-    if "=" not in repr(field) and not hasattr(field, "required"):
-        default = "=None"
-    elif not hasattr(field, "required"):
-        default = f'="{field.default}"'
-    elif field.default is None and not getattr(field, "required", False):
-        if typer:
-            default = f' = typer.Option(None, help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
-        else:
-            default = "=None"
-    elif field.default is not None:
-        if typer:
-            default = f' = typer.Option("{field.default}", help="{field.field_info.description or ""}", rich_help_panel="{panel_name}"{prompt})'
-        else:
-            default = f'="{field.default}"'
-    elif typer:
-        default = f' = typer.Option(..., help="{field.field_info.description or ""}", rich_help_panel="{panel_name}", prompt=True)'
-    else:
-        default = ""
     if typer:
-        return f"{name}: {annotation}{default}"
+        default = create_default_typer(
+            panel_name=panel_name,
+            field=field,
+            prompt_always=prompt_always,
+        )
+    else:
+        default = create_default(
+            field=field,
+        )
+
     return f"{name}: {annotation}{default}"
 
 
@@ -74,12 +100,12 @@ def make_signature(
     if more_args is None:
         more_args = {}
     sig = inspect.signature(func)
-    names = {}
+    parents = {}
     for name, param in sig.parameters.items():
         if hasattr(param.annotation, "__fields__"):
             more_args = {**more_args, **param.annotation.__fields__}
             for field in param.annotation.__fields__:
-                names[field] = param.annotation.__name__
+                parents[field] = param.annotation.__name__
         else:
             more_args[name] = param
 
@@ -90,13 +116,13 @@ def make_signature(
         for name, param in more_args.items():
             if hasattr(param.annotation, "__fields__"):
                 # model parent lookup
-                names[param.annotation.__name__] = names[name]
+                parents[param.annotation.__name__] = parents[name]
 
                 if name not in param.annotation.__fields__.keys():
                     keys_to_remove.append(name)
                 more_args = {**more_args, **param.annotation.__fields__}
                 for field in param.annotation.__fields__:
-                    names[field] = param.annotation.__name__
+                    parents[field] = param.annotation.__name__
 
         for key in keys_to_remove:
             del more_args[key]
@@ -108,7 +134,7 @@ def make_signature(
         make_annotation(
             name,
             field,
-            names=names,
+            parents=parents,
             typer=typer,
         )
         for name, field in more_args.items()
