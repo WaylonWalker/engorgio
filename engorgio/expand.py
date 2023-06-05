@@ -19,7 +19,9 @@ from pydantic.fields import ModelField
 def create_default(field: ModelField) -> str:
     """Create the default value for pydantic ModelFields."""
     if "=" not in repr(field) and not hasattr(field, "required"):
-        default = "=None"
+        default = ""
+    if "=" not in repr(field) and hasattr(field, "required"):
+        default = ""
     elif not hasattr(field, "required"):
         default = f'="{field.default}"'
     elif field.default is None and not getattr(field, "required", False):
@@ -43,6 +45,8 @@ def create_default_typer(
     if prompt_always:
         prompt = ", prompt=True"
     if "=" not in repr(field) and not hasattr(field, "required"):
+        default = ""
+    if "=" not in repr(field) and hasattr(field, "required"):
         default = "=None"
     elif not hasattr(field, "required"):
         default = f'="{field.default}"'
@@ -74,6 +78,7 @@ def make_annotation(
         if str(field.annotation).startswith("<")
         else str(field.annotation)
     )
+    annotation = f": {annotation}" if annotation != "_empty" else ""
     if typer:
         default = create_default_typer(
             panel_name="--".join(name.split(model_separator)[:-1]),
@@ -85,7 +90,7 @@ def make_annotation(
             field=field,
         )
 
-    return f"{name}: {annotation}{default}"
+    return f"{name}{annotation}{default}"
 
 
 def init_more_args(

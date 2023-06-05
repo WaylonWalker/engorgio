@@ -135,6 +135,20 @@ class PersonFactory(ModelFactory[Person]):
     __model__ = Person
 
 
+class HeroFactory(ModelFactory[Hero]):
+
+    """A class for generating a hero."""
+
+    __model__ = Hero
+
+
+class PetFactory(ModelFactory[Pet]):
+
+    """A class for generating a pet."""
+
+    __model__ = Pet
+
+
 class MyDate(BaseModel):
     date: datetime.datetime
 

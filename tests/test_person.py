@@ -10,14 +10,13 @@ import inspect
 import pytest
 
 from engorgio import engorgio
+from tests import models
 
-from . import models
 
-# this one is broken
-# def test_no_pydantic() -> None:
-#     @engorgio()
-#     def get_person(alpha) -> None:
-#         """Mydocstring."""
+def test_no_pydantic() -> None:
+    @engorgio()
+    def get_person(alpha) -> None:
+        """Mydocstring."""
 
 
 def test_single_signature() -> None:

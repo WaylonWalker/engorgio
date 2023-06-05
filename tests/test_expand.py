@@ -1,6 +1,5 @@
 from engorgio.expand import make_annotation
-
-from . import models
+from tests import models
 
 
 def test_make_annotation_person_name():
