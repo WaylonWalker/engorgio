@@ -9,10 +9,10 @@ SPDX-License-Identifier: MIT
 """
 
 import inspect
+import os
 from typing import Callable, Dict, Optional
 
 import black
-import pyflyby
 from pydantic.fields import ModelField
 
 
@@ -211,7 +211,15 @@ def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
     return wrapper({call_args})
     """
     new_func_str = black.format_str(src_contents=new_func_str, mode=black.FileMode())
+
+    pyflyby_log_level = os.getenv("PYFLYBY_LOG_LEVEL")
+    if pyflyby_log_level is None:
+        os.environ["PYFLYBY_LOG_LEVEL"] = "WARNING"
+
+    import pyflyby
+
     pyflyby.auto_import(new_func_str, locals())
+
     exec(new_func_str, locals(), globals())  # noqa: S102
     new_func = globals()[func.__name__]
 
