@@ -6,12 +6,20 @@ Classes:
 * `Color`: A class for representing a color.
 * `Hair`: A class for representing hair.
 * `Person`: A class for representing a person.
+* `MyDate`: A class for representing a date.
+* `Hero`: A class for representing a hero.
+* `Pet`: A class for representing a pet.
+
+SPDX-FileCopyrightText: 2023-present Waylon S. Walker <waylon@waylonwalker.com>
+
+SPDX-License-Identifier: MIT
 
 """
-
+from dataclasses import dataclass
 import datetime
 from typing import Optional
 
+from polyfactory.factories import DataclassFactory
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel, Field
 
@@ -96,6 +104,15 @@ class Person(BaseModel):
     )
 
 
+class Pet(BaseModel):
+    name: str = Field(..., description="The pet's name.")
+
+
+class Hero(BaseModel):
+    name: str = Field(..., description="The hero's name.")
+    pet: Pet = Field(..., description="The hero's pet.")
+
+
 class AlphaFactory(ModelFactory[Alpha]):
 
     """A class for generating an alpha value."""
@@ -124,9 +141,40 @@ class PersonFactory(ModelFactory[Person]):
     __model__ = Person
 
 
+class HeroFactory(ModelFactory[Hero]):
+
+    """A class for generating a hero."""
+
+    __model__ = Hero
+
+
+class PetFactory(ModelFactory[Pet]):
+
+    """A class for generating a pet."""
+
+    __model__ = Pet
+
+
 class MyDate(BaseModel):
     date: datetime.datetime
 
 
-class DateFactory(ModelFactory[MyDate]):
+class MyDateFactory(ModelFactory[MyDate]):
     __model__ = MyDate
+
+
+@dataclass
+class PersonDataclass:
+    name: str
+    alias: Optional[str]
+    age: int
+    email: Optional[str]
+    pet: str
+    address: str
+
+
+class PersonDataclassFactory(DataclassFactory[PersonDataclass]):
+
+    """A class for generating a person."""
+
+    __model__ = PersonDataclass

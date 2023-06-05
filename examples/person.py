@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from typer import Typer
 
 from engorgio import engorgio
-from tests.models import Person
+from tests.models import Hero, Person
 
 app = Typer()
 
@@ -15,7 +15,10 @@ app = Typer()
 @engorgio()
 def get_person(person: Person, thing: str = None) -> Person:
     """Mydocstring."""
-    from rich import print
+    return person
 
-    print(str(thing))
-    print(person)
+
+@engorgio()
+def get_hero(hero: Hero) -> Hero:
+    """Mydocstring."""
+    return hero

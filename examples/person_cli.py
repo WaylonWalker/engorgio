@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 import typer
 
 from engorgio import engorgio
-from tests.models import Person
+from tests.models import Hero, Person
 
 app = typer.Typer(
     name="engorgio",
@@ -31,7 +31,17 @@ def get_person(person: Person, thing: str, another: str = "this") -> Person:
     print(another)
 
     print(person)
+    return person
+
+
+@app.command()
+@engorgio(typer=True)
+def get_hero(hero: Hero) -> Hero:
+    """Get a hero"""
+    from rich import print
+
+    print(hero)
 
 
 if __name__ == "__main__":
-    typer.run(get_person)
+    app()
