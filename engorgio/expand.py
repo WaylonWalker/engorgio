@@ -12,8 +12,8 @@ import inspect
 from typing import Callable, Dict, Optional
 
 import black
-from pydantic.fields import ModelField
 import pyflyby
+from pydantic.fields import ModelField
 
 
 def create_default(field: ModelField) -> str:
@@ -58,7 +58,7 @@ def create_default_typer(
 def make_annotation(
     name: str,
     field: ModelField,
-    parents: Dict[str, str],
+    # parents: Dict[str, str],
     model_separator: str = "__",
     *,
     typer: bool = False,
@@ -66,12 +66,8 @@ def make_annotation(
 ) -> str:
     """Create an annotation for pydantic ModelFields."""
     # might still need this when parents=False
-    # panel_name = parents.get(name.split(model_separator)[-1]) or name
-    # next_name = panel_name.split(model_separator)[-1]
     # while next_name is not None:
-    #     next_name = parents.get(next_name)
     #     if next_name is not None:
-    #         panel_name = f"{next_name}.{panel_name}"
 
     annotation = (
         field.annotation.__name__
@@ -154,7 +150,6 @@ def make_expanded_function(
             name,
             field,
             model_separator=model_separator,
-            parents=parents,
             typer=typer,
         )
         for name, field in more_args.items()

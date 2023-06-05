@@ -19,7 +19,7 @@ def engorgio(
     *,
     model_separator: str = "__",
     include_parent_model: bool = True,
-    typer: bool = False
+    typer: bool = False,
 ) -> Callable:
     """Expand Pydantic keyword arguments.
 
@@ -37,7 +37,7 @@ def engorgio(
                     kwargs=kwargs,
                     model_separator=model_separator,
                     include_parent_model=include_parent_model,
-                )
+                ),
             )
 
         return make_expanded_function(

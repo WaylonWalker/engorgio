@@ -43,6 +43,19 @@ def test_make_annotation_person_alias_typer():
     )
 
 
+def test_make_annotation_person_alias_typer_model_separator():
+    assert (
+        make_annotation(
+            "person_____alias",
+            models.Person.__fields__["alias"],
+            {"alias": "person"},
+            typer=True,
+            model_separator="_____",
+        ) ==
+        'person_____alias: typing.Optional[str] = typer.Option(None, help="An optional other name for the person.", rich_help_panel="person")'
+    )
+
+
 def test_make_annotation_person_alias_typer_prompt_always():
     assert (
         make_annotation(

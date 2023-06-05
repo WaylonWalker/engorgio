@@ -1,14 +1,17 @@
+"""Condense parameters back into models."""
 import inspect
 from typing import Any, Callable, Dict, Optional
 
 
 def get_kwargs_for_param(
-    param,
-    kwargs,
+    param: inspect.Parameter,
+    kwargs: Dict,
     model_separator: str = "__",
 ):
+    """Get kwargs for the param from the dict of kwargs."""
     param_kwargs = {}
-    model_kwargs = {k: v for k, v in kwargs.items() if len(k.split("__")) >= 2}
+    min_kwargs = 2
+    model_kwargs = {k: v for k, v in kwargs.items() if len(k.split("__")) >= min_kwargs}
     param_kwargs = {
         k.split(model_separator)[-1]: v
         for k, v in model_kwargs.items()
@@ -23,7 +26,7 @@ def expand_param(
     models: Optional[Dict[str, str]] = None,
     model_separator: str = "__",
     *,
-    include_parent_model: bool = True
+    include_parent_model: bool = True,
 ) -> Any:
     """Further expands params with a Pydantic annotation, given a param.
 
@@ -43,22 +46,19 @@ def expand_param(
     if include_parent_model:
         param_kwargs = get_kwargs_for_param(
             param=param,
-            # field=field,
             kwargs=kwargs,
             model_separator=model_separator,
         )
     else:
         param_kwargs = kwargs
-    try:
-        return param.annotation(**param_kwargs, **models)
-    except Exception:
-        breakpoint()
+    return param.annotation(**param_kwargs, **models)
 
 
 def condense_instances(
     func: Callable,
     kwargs: Dict[str, Any],
     model_separator: str = "__",
+    *,
     include_parent_model: bool = True,
 ) -> Dict[str, Any]:
     """Condense expanded kwargs back to model instances.
