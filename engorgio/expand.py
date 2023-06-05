@@ -9,10 +9,11 @@ SPDX-License-Identifier: MIT
 """
 
 import inspect
-from typing import Any, Callable, Dict, Optional
+from typing import Callable, Dict, Optional
 
-import pyflyby
+import black
 from pydantic.fields import ModelField
+import pyflyby
 
 
 def create_default(field: ModelField) -> str:
@@ -58,17 +59,19 @@ def make_annotation(
     name: str,
     field: ModelField,
     parents: Dict[str, str],
+    model_separator: str = "__",
     *,
     typer: bool = False,
     prompt_always: bool = False,
 ) -> str:
     """Create an annotation for pydantic ModelFields."""
-    panel_name = parents.get(name)
-    next_name = panel_name
-    while next_name is not None:
-        next_name = parents.get(next_name)
-        if next_name is not None:
-            panel_name = f"{next_name}.{panel_name}"
+    # might still need this when parents=False
+    # panel_name = parents.get(name.split(model_separator)[-1]) or name
+    # next_name = panel_name.split(model_separator)[-1]
+    # while next_name is not None:
+    #     next_name = parents.get(next_name)
+    #     if next_name is not None:
+    #         panel_name = f"{next_name}.{panel_name}"
 
     annotation = (
         field.annotation.__name__
@@ -77,7 +80,7 @@ def make_annotation(
     )
     if typer:
         default = create_default_typer(
-            panel_name=panel_name,
+            panel_name="--".join(name.split(model_separator)[:-1]),
             field=field,
             prompt_always=prompt_always,
         )
@@ -92,7 +95,9 @@ def make_annotation(
 def make_expanded_function(
     func: Callable,
     wrapper: Callable,
+    model_separator: str = "__",
     *,
+    include_parent_model: bool = True,
     typer: bool = False,
     more_args: Optional[Dict] = None,
 ):
@@ -101,9 +106,17 @@ def make_expanded_function(
         more_args = {}
     sig = inspect.signature(func)
     parents = {}
+
     for name, param in sig.parameters.items():
         if hasattr(param.annotation, "__fields__"):
-            more_args = {**more_args, **param.annotation.__fields__}
+            if include_parent_model:
+                new_param = {
+                    f"{name}{model_separator}{k}": v
+                    for k, v in param.annotation.__fields__.items()
+                }
+            else:
+                new_param = param.annotation.__fields__
+            more_args = {**more_args, **new_param}
             for field in param.annotation.__fields__:
                 parents[field] = param.annotation.__name__
         else:
@@ -116,11 +129,20 @@ def make_expanded_function(
         for name, param in more_args.items():
             if hasattr(param.annotation, "__fields__"):
                 # model parent lookup
-                parents[param.annotation.__name__] = parents[name]
 
                 if name not in param.annotation.__fields__.keys():
                     keys_to_remove.append(name)
-                more_args = {**more_args, **param.annotation.__fields__}
+
+                if include_parent_model:
+                    new_param = {
+                        f"{name}{model_separator}{k}": v
+                        for k, v in param.annotation.__fields__.items()
+                    }
+                else:
+                    new_param = param.annotation.__fields__
+
+                more_args = {**more_args, **new_param}
+
                 for field in param.annotation.__fields__:
                     parents[field] = param.annotation.__name__
 
@@ -131,6 +153,7 @@ def make_expanded_function(
         make_annotation(
             name,
             field,
+            model_separator=model_separator,
             parents=parents,
             typer=typer,
         )
@@ -142,7 +165,7 @@ def make_expanded_function(
     kwargs = ", ".join([arg for arg in annotations if "=" in arg])
 
     # args to call the wrapper function with
-    call_args = ",".join([f"{name}={name}" for name, field in more_args.items()])
+    call_args = ",".join([f"{name}={name}" for name in more_args])
 
     # update the docscring
     wrapper.__doc__ = (
@@ -150,10 +173,12 @@ def make_expanded_function(
     ) + f"\nalso accepts {more_args.keys()} in place of person model"
 
     new_func_str = f"""
+import typer
 def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
     '''{func.__doc__}'''
     return wrapper({call_args})
     """
+    new_func_str = black.format_str(src_contents=new_func_str, mode=black.FileMode())
     pyflyby.auto_import(new_func_str, locals())
     exec(new_func_str, locals(), globals())  # noqa: S102
     new_func = globals()[func.__name__]
@@ -166,53 +191,6 @@ def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
                 wrapper,
                 typer=typer,
                 more_args=more_args,
+                model_separator=model_separator,
             )
     return new_func
-
-
-def expand_param(
-    param: inspect.Parameter,
-    kwargs: Dict[str, Any],
-    models: Optional[Dict[str, str]] = None,
-) -> Any:
-    """Further expands params with a Pydantic annotation, given a param.
-
-    Recursively creates an instance of any param.annotation that has __fields__
-    using the expanded kwargs.y:
-    using the expanded kwargs.
-    """
-    if models is None:
-        models = {}
-
-    for field_name, field in param.annotation.__fields__.items():
-        if hasattr(field.annotation, "__fields__"):
-            models[field_name] = expand_param(field, kwargs, models)
-    return param.annotation(**kwargs, **models)
-
-
-def expand_kwargs(func: Callable, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Expand kwargs with Pydantic annotations given a function.
-
-    Inspects the arguments of the func and expands any of the kwargs with a
-    Pydantic annotation, to add its fields to the kwargs.
-    """
-    sig = inspect.signature(func)
-    updated_kwargs = {}
-    for name, value in kwargs.items():
-        if name in sig.parameters:
-            updated_kwargs[name] = value
-
-    for name, param in sig.parameters.items():
-        # func wants this directly
-        # this should check isinstance, but it's not working
-        #
-        if name in kwargs and repr(param.annotation) == repr(kwargs[name]):
-            updated_kwargs[name] = kwargs[name]
-
-        # an instance was not passed in, create one with kwargs passed in
-        elif hasattr(param.annotation, "__fields__"):
-            updated_kwargs[name] = expand_param(param, kwargs)
-        # its something else so pass it
-    return updated_kwargs
-    return updated_kwargs
-    return updated_kwargs

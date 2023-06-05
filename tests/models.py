@@ -98,6 +98,15 @@ class Person(BaseModel):
     )
 
 
+class Pet(BaseModel):
+    name: str
+
+
+class Hero(BaseModel):
+    name: str
+    pet: Pet
+
+
 class AlphaFactory(ModelFactory[Alpha]):
 
     """A class for generating an alpha value."""

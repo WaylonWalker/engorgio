@@ -21,7 +21,7 @@ from . import models
 
 
 def test_single_signature() -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_person(alpha: models.Alpha) -> None:
         """Mydocstring."""
         return alpha
@@ -35,22 +35,47 @@ def test_single_signature() -> None:
     assert get_person(**alpha.dict()) == alpha
 
 
-@pytest.mark.parametrize(
-    "alpha",
-    models.AlphaFactory().batch(size=5),
-)
-def test_single_instance(alpha: models.Alpha) -> None:
+def test_single_signature_with_parent() -> None:
     @engorgio()
     def get_person(alpha: models.Alpha) -> None:
         """Mydocstring."""
         return alpha
 
+    sig = inspect.signature(get_person)
+    params = sig.parameters
+    assert "alpha__a" in params
+
+    assert "alpha" not in params
+
+
+@pytest.mark.parametrize(
+    "alpha",
+    models.AlphaFactory().batch(size=5),
+)
+def test_single_instance(alpha: models.Alpha) -> None:
+    @engorgio(include_parent_model=False)
+    def get_person(alpha: models.Alpha) -> None:
+        """Mydocstring."""
+        return alpha
+
     assert get_person(**alpha.dict()) == alpha
-    # this should maybe work
+
+
+@pytest.mark.parametrize(
+    "alpha",
+    models.AlphaFactory().batch(size=5),
+)
+def test_single_instance_with_parent(alpha: models.Alpha) -> None:
+    @engorgio()
+    def get_person(alpha: models.Alpha) -> None:
+        """Mydocstring."""
+        return alpha
+
+    assert get_person(alpha__a=alpha.a) == alpha
 
 
 def test_one_nest_signature() -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_person(color: models.Color) -> None:
         """Mydocstring."""
         return color
@@ -69,12 +94,39 @@ def test_one_nest_signature() -> None:
     assert get_person(**color.dict(exclude={"alpha"}), **color.alpha.dict()) == color
 
 
+def test_one_nest_signature_with_parent() -> None:
+    @engorgio()
+    def get_person(color: models.Color) -> None:
+        """Mydocstring."""
+        return color
+
+    sig = inspect.signature(get_person)
+    params = sig.parameters
+    assert "color__r" in params
+    assert "color__g" in params
+    assert "color__b" in params
+    assert "color__alpha__a" in params
+    assert "a" not in params
+
+    assert "color" not in params
+    assert "alpha" not in params
+
+    # color = models.ColorFactory().build()
+    # assert (
+    #     get_person(
+    #         **color.dict(exclude={"alpha"}),
+    #         **{f"alpha__{k}": v for k, v in color.alpha.dict().items()},
+    #     ) ==
+    #     color
+    # )
+
+
 @pytest.mark.parametrize(
     "color",
     models.ColorFactory().batch(size=5),
 )
 def test_one_nest_instance(color: models.Color) -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_person(color: models.Color) -> None:
         """Mydocstring."""
         return color
@@ -83,7 +135,7 @@ def test_one_nest_instance(color: models.Color) -> None:
 
 
 def test_two_nest_signature() -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_hair(hair: models.Hair) -> None:
         """Mydocstring."""
         return hair
@@ -116,7 +168,7 @@ def test_two_nest_signature() -> None:
     models.HairFactory().batch(size=5),
 )
 def test_two_nest_instance(hair: models.Hair) -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_hair(hair: models.Hair) -> None:
         """Mydocstring."""
         return hair
@@ -132,7 +184,7 @@ def test_two_nest_instance(hair: models.Hair) -> None:
 
 
 def test_three_nest_signature() -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_person(person: models.Person) -> None:
         """Mydocstring."""
         return person
@@ -173,7 +225,7 @@ def test_three_nest_signature() -> None:
     models.PersonFactory().batch(size=5),
 )
 def test_three_nest_instance(person: models.Person) -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_person(person: models.Person) -> None:
         """Mydocstring."""
         return person
@@ -190,7 +242,7 @@ def test_three_nest_instance(person: models.Person) -> None:
 
 
 def test_mydate() -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_mydate(date: models.MyDate) -> None:
         """Mydocstring."""
         return date
@@ -208,7 +260,7 @@ def test_mydate() -> None:
     models.MyDateFactory().batch(size=5),
 )
 def test_mydate_instance(date: models.MyDate) -> None:
-    @engorgio()
+    @engorgio(include_parent_model=False)
     def get_mydate(date: models.MyDate) -> None:
         """Mydocstring."""
         return date

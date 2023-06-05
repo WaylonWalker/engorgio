@@ -13,44 +13,46 @@ def test_make_annotation_person_name():
 def test_make_annotation_person_name_typer():
     assert (
         make_annotation(
-            "name",
+            "person__name",
             models.Person.__fields__["name"],
             {"name": "person"},
             typer=True,
         ) ==
-        'name: str = typer.Option(..., help="The name of the person.", rich_help_panel="person", prompt=True)'
+        'person__name: str = typer.Option(..., help="The name of the person.", rich_help_panel="person", prompt=True)'
     )
 
 
 def test_make_annotation_person_alias():
     assert (
-        make_annotation("name", models.Person.__fields__["alias"], {"name": "person"}) ==
-        "name: typing.Optional[str]=None"
+        make_annotation(
+            "person__alias", models.Person.__fields__["alias"], {"name": "person"}
+        ) ==
+        "person__alias: typing.Optional[str]=None"
     )
 
 
 def test_make_annotation_person_alias_typer():
     assert (
         make_annotation(
-            "name",
+            "person__alias",
             models.Person.__fields__["alias"],
-            {"name": "person"},
+            {"alias": "person"},
             typer=True,
         ) ==
-        'name: typing.Optional[str] = typer.Option(None, help="An optional other name for the person.", rich_help_panel="person")'
+        'person__alias: typing.Optional[str] = typer.Option(None, help="An optional other name for the person.", rich_help_panel="person")'
     )
 
 
 def test_make_annotation_person_alias_typer_prompt_always():
     assert (
         make_annotation(
-            "name",
+            "person__alias",
             models.Person.__fields__["alias"],
-            {"name": "person"},
+            {"alias": "person"},
             typer=True,
             prompt_always=True,
         ) ==
-        'name: typing.Optional[str] = typer.Option(None, help="An optional other name for the person.", rich_help_panel="person", prompt=True)'
+        'person__alias: typing.Optional[str] = typer.Option(None, help="An optional other name for the person.", rich_help_panel="person", prompt=True)'
     )
 
 
