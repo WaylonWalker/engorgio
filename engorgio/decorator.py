@@ -9,7 +9,7 @@ from typing import Any, Callable
 
 import typer
 
-from engorgio.expand import expand_kwargs, make_signature
+from engorgio.expand import expand_kwargs, make_expanded_function
 
 __all__ = ["typer"]
 
@@ -26,6 +26,6 @@ def engorgio(*, typer: bool = False) -> Callable:
         def wrapper(*args, **kwargs):
             return func(*args, **expand_kwargs(func, kwargs))
 
-        return make_signature(func, wrapper, typer=typer)
+        return make_expanded_function(func, wrapper, typer=typer)
 
     return decorator

@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 import inspect
 from typing import Any, Callable, Dict, Optional
 
-from pydantic.fields import ModelField
 import pyflyby
+from pydantic.fields import ModelField
 
 
 def create_default(field: ModelField) -> str:
@@ -35,7 +35,7 @@ def create_default_typer(
     panel_name: str,
     field: ModelField,
     *,
-    prompt_always: bool,
+    prompt_always: bool = False,
 ) -> str:
     """Create the default value for pydantic ModelFields for typer functions."""
     prompt = ""
@@ -89,7 +89,7 @@ def make_annotation(
     return f"{name}: {annotation}{default}"
 
 
-def make_signature(
+def make_expanded_function(
     func: Callable,
     wrapper: Callable,
     *,
@@ -127,10 +127,7 @@ def make_signature(
         for key in keys_to_remove:
             del more_args[key]
 
-    wrapper.__doc__ = (
-        func.__doc__ or ""
-    ) + f"\nalso accepts {more_args.keys()} in place of person model"
-    raw_args = [
+    annotations = [
         make_annotation(
             name,
             field,
@@ -139,18 +136,18 @@ def make_signature(
         )
         for name, field in more_args.items()
     ]
-    aargs = ", ".join([arg for arg in raw_args if "=" not in arg])
-    kwargs = ", ".join([arg for arg in raw_args if "=" in arg])
 
+    # split raw_args into args and kwargs
+    aargs = ", ".join([arg for arg in annotations if "=" not in arg])
+    kwargs = ", ".join([arg for arg in annotations if "=" in arg])
+
+    # args to call the wrapper function with
     call_args = ",".join([f"{name}={name}" for name, field in more_args.items()])
 
-    def get_import(arg):
-        try:
-            if arg.type_.__module__ != "builtins":
-                return f"from {arg.type_.__module__} import {arg.type_.__name__}\n"
-        except AttributeError:
-            ...
-        return ""
+    # update the docscring
+    wrapper.__doc__ = (
+        func.__doc__ or ""
+    ) + f"\nalso accepts {more_args.keys()} in place of person model"
 
     new_func_str = f"""
 def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
@@ -164,7 +161,12 @@ def {func.__name__}({aargs}{', ' if aargs else ''}{kwargs}):
     sig = inspect.signature(new_func)
     for param in sig.parameters.values():
         if hasattr(param.annotation, "__fields__"):
-            return make_signature(new_func, wrapper, typer=typer, more_args=more_args)
+            return make_expanded_function(
+                new_func,
+                wrapper,
+                typer=typer,
+                more_args=more_args,
+            )
     return new_func
 
 
@@ -211,4 +213,6 @@ def expand_kwargs(func: Callable, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         elif hasattr(param.annotation, "__fields__"):
             updated_kwargs[name] = expand_param(param, kwargs)
         # its something else so pass it
+    return updated_kwargs
+    return updated_kwargs
     return updated_kwargs
