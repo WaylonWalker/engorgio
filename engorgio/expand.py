@@ -125,7 +125,7 @@ def get_more_args(
     func: Callable,
     model_separator: str = "__",
     *,
-    include_parent_model: bool = None,
+    include_parent_model: Optional[bool] = None,
     more_args: Optional[Dict] = None,
 ) -> Dict:
     """Get the more_args dict."""

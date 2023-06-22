@@ -14,15 +14,13 @@ def get_kwargs_for_param(
     model_separator: str = "__",
 ):
     """Get kwargs for the param from the dict of kwargs."""
-    param_kwargs = {}
     min_kwargs = 2
     model_kwargs = {k: v for k, v in kwargs.items() if len(k.split("__")) >= min_kwargs}
-    param_kwargs = {
+    return {
         k.split(model_separator)[-1]: v
         for k, v in model_kwargs.items()
         if k.split(model_separator)[-2] == param.name
     }
-    return param_kwargs
 
 
 def expand_param(
