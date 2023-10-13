@@ -27,7 +27,7 @@ dependencies = [
   "black",
   "rich",
   "typer",
-  "pydantic",
+  "pydantic<2.0",
   "anyconfig"
 ]
 dynamic = ["version"]
