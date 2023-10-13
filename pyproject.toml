@@ -26,7 +26,6 @@ classifiers = [
 dependencies = [
   "black",
   "rich",
-  "textual",
   "typer",
   "pydantic",
   "anyconfig"
