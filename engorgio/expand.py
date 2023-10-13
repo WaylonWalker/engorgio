@@ -146,7 +146,7 @@ def get_more_args(
             if hasattr(param.annotation, "__fields__"):
                 # model parent lookup
 
-                if name not in param.annotation.__fields__.keys():
+                if name not in param.annotation.__fields__:
                     keys_to_remove.append(name)
 
                 if include_parent_model:
